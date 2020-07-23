@@ -161,7 +161,7 @@ void set_convert_context(share_queue* q, dst_scale_context* scale_info,
 
 	scale_info->convert_ctx = sws_getContext(src_width, src_height,
 		(AVPixelFormat)q->header->format, dst_width, dst_height,
-		(AVPixelFormat)scale_info->dst_format, SWS_FAST_BILINEAR,
+		(AVPixelFormat)scale_info->dst_format, SWS_POINT,
 		NULL, NULL, NULL);
 	q->operating_width = src_width;
 	q->operating_height = src_height;
@@ -230,11 +230,44 @@ bool shared_queue_get_video(share_queue* q, dst_scale_context* scale_info,
 
 	dst += scale_info->dst_offset;
 
+  //source flip
+  int32_t frame_linesize[4] = {0,0,0,0};
+  for (int i=0; i<4; i++)
+    frame_linesize[i] = frame->linesize[i];
+
+  bool v_flip = true;
+
+  if (v_flip)
+  {
+    data[0] += frame->linesize[0]*(frame->frame_height-1);
+    frame_linesize[0] = -frame_linesize[0];
+  }
+
 	sws_scale(scale_info->convert_ctx,
 		(const uint8_t *const *)data,
-		(const int*)frame->linesize, 0, q->operating_height,
+		(const int*)frame_linesize, 0, q->operating_height,
 		(uint8_t *const *)&dst, (const int*)scale_info->dst_linesize);
+  /*
+  uint8_t *testOut = dst;
+  int outStride = scale_info->dst_linesize[0];
 
+  for (int i=0; i<height/2; i++)
+  {
+    uint8_t *testLine = testOut;
+    for (int j=0; j<frame->frame_width; j++)
+    {
+      testLine[0] = 0;
+      testLine[1] = 0;
+      testLine[2] = 255;
+      testLine[3] = 0;
+      testLine += 4;
+    }
+
+    testOut += outStride;
+    memset(testOut,0,outStride);
+    testOut += outStride;
+  }
+  */
 	*timestamp = frame->timestamp;
 
 	q->index++;

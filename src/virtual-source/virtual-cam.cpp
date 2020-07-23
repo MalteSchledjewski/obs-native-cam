@@ -65,7 +65,7 @@ CVCamStream::CVCamStream(HRESULT *phr, CVCam *pParent, LPCWSTR pPinName, int mod
 CSourceStream(NAME("Video"), phr, pParent, pPinName), parent(pParent)
 {
 	queue_mode = mode;
-	ListSupportFormat();
+	//ListSupportFormat();
 	use_obs_format_init = CheckObsSetting();
 	GetMediaType(0, &m_mt);
 	prev_end_ts = 0;
@@ -85,6 +85,7 @@ bool CVCamStream::CheckObsSetting()
 		if (obs_frame_time < MIN_FRAMETIME || obs_frame_time > MAX_FRAMETIME)
 			return false;
 
+      /*
 		if (obs_height < MIN_HEIGHT) {
 			obs_width = obs_width * MIN_HEIGHT / obs_height;
 			obs_height = MIN_HEIGHT;
@@ -97,7 +98,7 @@ bool CVCamStream::CheckObsSetting()
 
 		if (obs_height % 2 != 0)
 			obs_height += 1;
-
+      */
 		format_list.push_front(struct format(obs_width, obs_height, 
 			obs_frame_time));
 	}
@@ -108,10 +109,10 @@ bool CVCamStream::CheckObsSetting()
 void CVCamStream::SetConvertContext()
 {
 	VIDEOINFOHEADER *pvi = (VIDEOINFOHEADER *)(m_mt.Format());
-	scale_info.dst_format = AV_PIX_FMT_YUYV422;
+	scale_info.dst_format = AV_PIX_FMT_BGRA;//AV_PIX_FMT_YUYV422;
 	scale_info.dst_width = pvi->bmiHeader.biWidth;
 	scale_info.dst_height = pvi->bmiHeader.biHeight;
-	scale_info.dst_linesize[0] = pvi->bmiHeader.biWidth * 2;
+	scale_info.dst_linesize[0] = pvi->bmiHeader.biWidth * 4;////pvi->bmiHeader.biWidth * 2;
 }
 
 void CVCamStream::SetSyncTimeout()
@@ -234,7 +235,7 @@ STDMETHODIMP CVCamStream::Notify(IBaseFilter * pSender, Quality q)
 {
 	return E_NOTIMPL;
 }
-
+/*
 bool CVCamStream::ListSupportFormat()
 {
 	if (format_list.size() > 0)
@@ -246,7 +247,7 @@ bool CVCamStream::ListSupportFormat()
 	format_list.push_back(struct format(640, 360, 333333));
 
 	return true;
-}
+}*/
 
 HRESULT CVCamStream::SetMediaType(const CMediaType *pmt)
 {
@@ -257,8 +258,8 @@ HRESULT CVCamStream::SetMediaType(const CMediaType *pmt)
 
 HRESULT CVCamStream::GetMediaType(int iPosition,CMediaType *pmt)
 {
-	if (format_list.size() == 0)
-		ListSupportFormat();
+	//if (format_list.size() == 0)
+		//ListSupportFormat();
 
 	if (iPosition < 0 || iPosition > format_list.size()-1)
 		return E_INVALIDARG;
@@ -267,7 +268,7 @@ HRESULT CVCamStream::GetMediaType(int iPosition,CMediaType *pmt)
 	pmt->AllocFormatBuffer(sizeof(VIDEOINFOHEADER)));
 	ZeroMemory(pvi, sizeof(VIDEOINFOHEADER));
 
-
+  /*
 	pvi->bmiHeader.biWidth = format_list[iPosition].width;
 	pvi->bmiHeader.biHeight = format_list[iPosition].height;
 	pvi->AvgTimePerFrame = format_list[iPosition].time_per_frame;
@@ -287,6 +288,29 @@ HRESULT CVCamStream::GetMediaType(int iPosition,CMediaType *pmt)
 	pmt->SetTemporalCompression(FALSE);
 	pmt->SetSubtype(&MEDIASUBTYPE_YUY2);
 	pmt->SetSampleSize(pvi->bmiHeader.biSizeImage);
+  */
+
+	pvi->bmiHeader.biWidth = format_list[iPosition].width;
+	pvi->bmiHeader.biHeight = format_list[iPosition].height;
+	pvi->AvgTimePerFrame = format_list[iPosition].time_per_frame;
+	pvi->bmiHeader.biCompression = 0;// MAKEFOURCC('Y', 'U', 'Y', '2');
+	pvi->bmiHeader.biBitCount = 32;
+	pvi->bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
+	pvi->bmiHeader.biPlanes = 1;
+	pvi->bmiHeader.biSizeImage = pvi->bmiHeader.biWidth * 
+		pvi->bmiHeader.biHeight * 4;
+	pvi->bmiHeader.biClrImportant = 0;
+
+	SetRectEmpty(&(pvi->rcSource)); 
+	SetRectEmpty(&(pvi->rcTarget)); 
+
+	pmt->SetType(&MEDIATYPE_Video);
+	pmt->SetFormatType(&FORMAT_VideoInfo);
+	pmt->SetTemporalCompression(FALSE);
+	pmt->SetSubtype(&MEDIASUBTYPE_RGB32);
+	pmt->SetSampleSize(pvi->bmiHeader.biSizeImage);
+
+
 	return NOERROR;
 
 } 
@@ -308,7 +332,7 @@ HRESULT CVCamStream::CheckMediaType(const CMediaType *pMediaType)
 	if (*info != FORMAT_VideoInfo)
 		return E_INVALIDARG;
 
-	if (*subtype != MEDIASUBTYPE_YUY2)
+	if (*subtype != MEDIASUBTYPE_RGB32)// MEDIASUBTYPE_YUY2)
 		return E_INVALIDARG;
 
 	if (pvi->AvgTimePerFrame < 166666 || pvi->AvgTimePerFrame >1000000)
@@ -322,6 +346,7 @@ HRESULT CVCamStream::CheckMediaType(const CMediaType *pMediaType)
 
 bool CVCamStream::ValidateResolution(long width,long height)
 {
+/*
 	if (width < 320 || height < 240)
 		return false;
 	else if (width > 4096)
@@ -330,7 +355,9 @@ bool CVCamStream::ValidateResolution(long width,long height)
 		return true;
 	else if (width * 3 == height * 4)
 		return true;
-	else if (use_obs_format_init && width == obs_width && height == obs_height)
+	else
+  */
+  if (use_obs_format_init && width == obs_width && height == obs_height)
 		return true;
 	else
 		return false;
@@ -407,8 +434,8 @@ HRESULT STDMETHODCALLTYPE CVCamStream::GetFormat(AM_MEDIA_TYPE **ppmt)
 HRESULT STDMETHODCALLTYPE CVCamStream::GetNumberOfCapabilities(int *piCount, 
 	int *piSize)
 {
-	if (format_list.size() == 0)
-		ListSupportFormat();
+	//if (format_list.size() == 0)
+		//ListSupportFormat();
 	
 	*piCount = format_list.size();
 	*piSize = sizeof(VIDEO_STREAM_CONFIG_CAPS);
@@ -418,8 +445,8 @@ HRESULT STDMETHODCALLTYPE CVCamStream::GetNumberOfCapabilities(int *piCount,
 HRESULT STDMETHODCALLTYPE CVCamStream::GetStreamCaps(int iIndex, 
 	AM_MEDIA_TYPE **pmt, BYTE *pSCC)
 {
-	if (format_list.size() == 0)
-		ListSupportFormat();
+	//if (format_list.size() == 0)
+		//ListSupportFormat();
 
 	if (iIndex < 0 || iIndex > format_list.size() - 1)
 		return E_INVALIDARG;
@@ -432,19 +459,19 @@ HRESULT STDMETHODCALLTYPE CVCamStream::GetStreamCaps(int iIndex,
 	pvi->bmiHeader.biHeight = format_list[iIndex].height;
 	pvi->AvgTimePerFrame = format_list[iIndex].time_per_frame;
 	pvi->AvgTimePerFrame = 333333;
-	pvi->bmiHeader.biCompression = MAKEFOURCC('Y', 'U', 'Y', '2');
-	pvi->bmiHeader.biBitCount = 16;
+	pvi->bmiHeader.biCompression = 0;//MAKEFOURCC('Y', 'U', 'Y', '2');
+	pvi->bmiHeader.biBitCount = 32;
 	pvi->bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
 	pvi->bmiHeader.biPlanes = 1;
 	pvi->bmiHeader.biSizeImage = pvi->bmiHeader.biWidth * 
-		pvi->bmiHeader.biHeight * 2;
+		pvi->bmiHeader.biHeight * 4;
 	pvi->bmiHeader.biClrImportant = 0;
 
 	SetRectEmpty(&(pvi->rcSource)); 
 	SetRectEmpty(&(pvi->rcTarget)); 
 
 	(*pmt)->majortype = MEDIATYPE_Video;
-	(*pmt)->subtype = MEDIASUBTYPE_YUY2;
+	(*pmt)->subtype = MEDIASUBTYPE_RGB32;//MEDIASUBTYPE_YUY2;
 	(*pmt)->formattype = FORMAT_VideoInfo;
 	(*pmt)->bTemporalCompression = FALSE;
 	(*pmt)->bFixedSizeSamples = FALSE;
@@ -479,9 +506,9 @@ HRESULT STDMETHODCALLTYPE CVCamStream::GetStreamCaps(int iIndex,
 	pvscc->MinFrameInterval = pvi->AvgTimePerFrame;   
 	pvscc->MaxFrameInterval = pvi->AvgTimePerFrame; 
 	pvscc->MinBitsPerSecond = pvi->bmiHeader.biWidth * pvi->bmiHeader.biHeight 
-		* 2 * 8 * (10000000 / pvi->AvgTimePerFrame);
+		* 4 * 8 * (10000000 / pvi->AvgTimePerFrame);
 	pvscc->MaxBitsPerSecond = pvi->bmiHeader.biWidth * pvi->bmiHeader.biHeight 
-		* 2 * 8 * (10000000 / pvi->AvgTimePerFrame);
+		* 4 * 8 * (10000000 / pvi->AvgTimePerFrame);
 
 	return S_OK;
 }
