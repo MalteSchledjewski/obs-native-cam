@@ -7,4 +7,6 @@ obs-NativeCam is a fork of obs-VirtualCam which attempts to ensure maximum quali
 
 3) The directshow source does not support any scaled resolutions at all. If there is no OBS stream active, the directshow filter will fail to open. The OBS stream must be started first, then the directshow filter will output exactly the resolution of the OBS source.
 
+4) Removed seemingly arbitrary minimum resolutions previously imposed by obs-virtualcam which are incompatible with certain low-res capture scenarios.
+
 Refer to https://github.com/catxFish/obs-virtual-cam for further info
