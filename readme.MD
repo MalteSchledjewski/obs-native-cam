@@ -1,5 +1,5 @@
 # OBS-NativeCam
-obs-NativeCam is a fork of obs-virutalcam which attempts to ensure maximum quality and native-resolution output of OBS sources.
+obs-NativeCam is a fork of obs-VirtualCam which attempts to ensure maximum quality and native-resolution output of OBS sources.
 
 1) The output plugin/main menu tool has been removed, preventing users from making the mistake of scaling their source into whatever their OBS canvas resolution is and outputting that.
 
