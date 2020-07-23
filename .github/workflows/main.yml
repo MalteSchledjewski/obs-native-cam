@@ -20,7 +20,7 @@ jobs:
       - name: 'Checkout'
         uses: actions/checkout@v2
         with:
-          path: ${{ github.workspace }}/obs-virtual-cam
+          path: ${{ github.workspace }}/obs-native-cam
           submodules: 'recursive'
       - name: 'Checkout OBS'
         uses: actions/checkout@v2
@@ -42,9 +42,9 @@ jobs:
         run: |
           git checkout ${{ env.OBS_GIT_TAG }}
           git submodule update
-      - name: 'Get obs-virtual-cam git info'
+      - name: 'Get obs-naive-cam git info'
         shell: bash
-        working-directory: ${{ github.workspace }}/obs-virtual-cam
+        working-directory: ${{ github.workspace }}/obs-native-cam
         run: |
           git fetch --prune --unshallow
           echo ::set-env name=GIT_BRANCH::${{ github.event.pull_request.head.ref }}
@@ -104,57 +104,57 @@ jobs:
         run: |
           msbuild /m /p:Configuration=RelWithDebInfo .\build64\libobs\libobs.vcxproj
           msbuild /m /p:Configuration=RelWithDebInfo .\build64\UI\obs-frontend-api\obs-frontend-api.vcxproj
-      - name: 'Configure obs-virtual-cam 64-bit'
-        working-directory: ${{ github.workspace }}/obs-virtual-cam
+      - name: 'Configure obs-native-cam 64-bit'
+        working-directory: ${{ github.workspace }}/obs-native-cam
         run: |
           mkdir .\build64
           cd .\build64
           cmake -G "${{ env.CMAKE_GENERATOR }}" -A x64 -DCMAKE_SYSTEM_VERSION="${{ env.CMAKE_SYSTEM_VERSION }}" -DQTDIR="${{ github.workspace }}\cmbuild\QT\${{ env.QT_VERSION }}\msvc2017_64" -DDepsPath="${{ github.workspace }}\cmbuild\deps\win64" -DLibObs_DIR="${{ github.workspace }}\obs-studio\build64\libobs" -DLIBOBS_INCLUDE_DIR="${{ github.workspace }}\obs-studio\libobs" -DLIBOBS_LIB="${{ github.workspace }}\obs-studio\build64\libobs\RelWithDebInfo\obs.lib" -DOBS_FRONTEND_LIB="${{ github.workspace }}\obs-studio\build64\UI\obs-frontend-api\RelWithDebInfo\obs-frontend-api.lib" -DPTHREAD_LIB="${{ github.workspace }}\obs-studio\build64\deps\w32-pthreads\RelWithDebInfo\w32-pthreads.lib" ..
-      - name: 'Configure obs-virtual-cam 32-bit'
-        working-directory: ${{ github.workspace }}/obs-virtual-cam
+      - name: 'Configure obs-native-cam 32-bit'
+        working-directory: ${{ github.workspace }}/obs-native-cam
         run: |
           mkdir .\build32
           cd .\build32
           cmake -G "${{ env.CMAKE_GENERATOR }}" -A Win32 -DCMAKE_SYSTEM_VERSION="${{ env.CMAKE_SYSTEM_VERSION }}" -DQTDIR="${{ github.workspace }}\cmbuild\QT\${{ env.QT_VERSION }}\msvc2017" -DDepsPath="${{ github.workspace }}\cmbuild\deps\win32" -DLibObs_DIR="${{ github.workspace }}\obs-studio\build32\libobs" -DLIBOBS_INCLUDE_DIR="${{ github.workspace }}\obs-studio\libobs" -DLIBOBS_LIB="${{ github.workspace }}\obs-studio\build32\libobs\RelWithDebInfo\obs.lib" -DOBS_FRONTEND_LIB="${{ github.workspace }}\obs-studio\build32\UI\obs-frontend-api\RelWithDebInfo\obs-frontend-api.lib" -DPTHREAD_LIB="${{ github.workspace }}\obs-studio\build32\deps\w32-pthreads\RelWithDebInfo\w32-pthreads.lib"  ..     
-      - name: 'Build obs-virtual-cam 64-bit'
-        working-directory: ${{ github.workspace }}/obs-virtual-cam
-        run: msbuild /m /p:Configuration=RelWithDebInfo .\build64\obs-virtualcam.sln
-      - name: 'Build obs-virtual-cam 32-bit'
-        working-directory: ${{ github.workspace }}/obs-virtual-cam
-        run: msbuild /m /p:Configuration=RelWithDebInfo .\build32\obs-virtualcam.sln
+      - name: 'Build obs-native-cam 64-bit'
+        working-directory: ${{ github.workspace }}/obs-native-cam
+        run: msbuild /m /p:Configuration=RelWithDebInfo .\build64\obs-nativecam.sln
+      - name: 'Build obs-native-cam 32-bit'
+        working-directory: ${{ github.workspace }}/obs-native-cam
+        run: msbuild /m /p:Configuration=RelWithDebInfo .\build32\obs-nativecam.sln
       - name: 'Set release filename'
         shell: bash
         run: |
-          FILENAME="OBS-Virtualcam-${{ env.GIT_TAG }}-Windows"
+          FILENAME="OBS-Nativecam-${{ env.GIT_TAG }}-Windows"
           echo "::set-env name=WIN_FILENAME::$FILENAME"
-      - name: 'Package obs-virtual-cam'
-        working-directory: ${{ github.workspace }}/obs-virtual-cam
+      - name: 'Package obs-native-cam'
+        working-directory: ${{ github.workspace }}/obs-native-cam
         run: |
           mkdir build-package\obs-plugins\64bit
           mkdir build-package\obs-plugins\32bit
-          mkdir build-package\data\obs-plugins\obs-virtualoutput\locale\
+          mkdir build-package\data\obs-plugins\obs-nativeoutput\locale\
           mkdir build-package\bin\64bit
           mkdir build-package\bin\32bit
           robocopy ${{ github.workspace }}\cmbuild\deps\win32\bin\ .\build-package\bin\32bit\ avutil-56.dll swscale-5.dll
-          robocopy .\build64\src\virtual-output\RelWithDebInfo .\build-package\obs-plugins\64bit\ obs-virtualoutput.dll obs-virtualoutput.stripped.pdb
-          robocopy .\build64\src\virtual-source\RelWithDebInfo .\build-package\bin\64bit\ obs-virtualsource.dll obs-virtualsource.stripped.pdb
-          robocopy .\build32\src\virtual-output\RelWithDebInfo .\build-package\obs-plugins\32bit\ obs-virtualoutput.dll obs-virtualoutput.stripped.pdb
-          robocopy .\build32\src\virtual-source\RelWithDebInfo .\build-package\bin\32bit\ obs-virtualsource.dll obs-virtualsource.stripped.pdb
-          robocopy .\locale\ .\build-package\data\obs-plugins\obs-virtualoutput\locale\ *.ini
-          ren .\build-package\obs-plugins\64bit\obs-virtualoutput.stripped.pdb obs-virtualoutput.pdb
-          ren .\build-package\obs-plugins\32bit\obs-virtualoutput.stripped.pdb obs-virtualoutput.pdb
-          ren .\build-package\bin\64bit\obs-virtualsource.stripped.pdb obs-virtualsource.pdb
-          ren .\build-package\bin\32bit\obs-virtualsource.stripped.pdb obs-virtualsource.pdb
+          robocopy .\build64\src\virtual-output\RelWithDebInfo .\build-package\obs-plugins\64bit\ obs-nativeoutput.dll obs-nativeoutput.stripped.pdb
+          robocopy .\build64\src\virtual-source\RelWithDebInfo .\build-package\bin\64bit\ obs-nativesource.dll obs-nativesource.stripped.pdb
+          robocopy .\build32\src\virtual-output\RelWithDebInfo .\build-package\obs-plugins\32bit\ obs-nativeoutput.dll obs-nativeoutput.stripped.pdb
+          robocopy .\build32\src\virtual-source\RelWithDebInfo .\build-package\bin\32bit\ obs-nativesource.dll obs-nativesource.stripped.pdb
+          robocopy .\locale\ .\build-package\data\obs-plugins\obs-nativeoutput\locale\ *.ini
+          ren .\build-package\obs-plugins\64bit\obs-nativeoutput.stripped.pdb obs-nativeoutput.pdb
+          ren .\build-package\obs-plugins\32bit\obs-nativeoutput.stripped.pdb obs-nativeoutput.pdb
+          ren .\build-package\bin\64bit\obs-nativesource.stripped.pdb obs-nativesource.pdb
+          ren .\build-package\bin\32bit\obs-nativesource.stripped.pdb obs-nativesource.pdb
           mkdir release
           7z a ".\release\${{ env.WIN_FILENAME }}.zip" ".\build-package\*"
       - name: Install NSIS
-        working-directory: ${{ github.workspace }}/obs-virtual-cam
+        working-directory: ${{ github.workspace }}/obs-native-cam
         run: |
           Invoke-Expression (New-Object System.Net.WebClient).DownloadString('https://get.scoop.sh')
           scoop bucket add extras
           scoop install nsis
-      - name: Build obs-virtualcam installer
-        working-directory: ${{ github.workspace }}/obs-virtual-cam
+      - name: Build obs-nativecam installer
+        working-directory: ${{ github.workspace }}/obs-native-cam
         run: |
           cd installer
           makensis /DVERSION=${{ env.GIT_TAG }} installer.nsi
@@ -163,10 +163,10 @@ jobs:
         uses: actions/upload-artifact@v2-preview
         with:
           name: '${{ env.GIT_TAG }}-Windows'
-          path: ${{ github.workspace }}\obs-virtual-cam\release\*.zip
+          path: ${{ github.workspace }}\obs-native-cam\release\*.zip
       - name: 'Publish ${{ env.WIN_FILENAME }}-Windows-Installer.exe'
         if: success()
         uses: actions/upload-artifact@v2-preview
         with:
           name: '${{ env.GIT_TAG }}-Windows-Installer'
-          path: ${{ github.workspace }}\obs-virtual-cam\build-package\*.exe
+          path: ${{ github.workspace }}\obs-native-cam\build-package\*.exe
