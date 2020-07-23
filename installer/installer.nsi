@@ -2,6 +2,7 @@ Unicode true
 
 ; Define your application name
 !define APPNAME "obs-nativecam"
+!define VERSION "1.0.0"
 !ifndef APPVERSION
 !define APPVERSION ${VERSION}
 !define SHORTVERSION ${VERSION}
