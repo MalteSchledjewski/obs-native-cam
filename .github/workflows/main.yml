@@ -152,7 +152,7 @@ jobs:
         run: |
           Invoke-Expression (New-Object System.Net.WebClient).DownloadString('https://get.scoop.sh')
           scoop bucket add extras
-          scoop -s install nsis
+          scoop install nsis -s
       - name: Build obs-nativecam installer
         working-directory: ${{ github.workspace }}/obs-native-cam
         run: |
