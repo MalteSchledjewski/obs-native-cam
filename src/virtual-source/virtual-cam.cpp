@@ -260,6 +260,9 @@ HRESULT CVCamStream::GetMediaType(int iPosition,CMediaType *pmt)
 {
 	//if (format_list.size() == 0)
 		//ListSupportFormat();
+  //no source stream must have been created yet. fail.
+  if (format_list.size()==0)
+    return E_INVALIDARG;
 
 	if (iPosition < 0 || iPosition > format_list.size()-1)
 		return E_INVALIDARG;
