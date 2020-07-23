@@ -8,7 +8,7 @@
 #define SAMPLE_RATE 44100
 #define SAMPLE_SIZE 176400
 
-EXTERN_C const GUID CLSID_OBS_VirtualA;
+EXTERN_C const GUID CLSID_OBS_NativeA;
 
 class CVAudioStream;
 class CVAudio : public CSource, public  IAMFilterMiscFlags

@@ -17,7 +17,7 @@ CUnknown * WINAPI CVAudio::CreateInstance(LPUNKNOWN lpunk, HRESULT *phr)
 }
 
 CVAudio::CVAudio(LPUNKNOWN lpunk, HRESULT *phr) : 
-CSource(NAME("OBS Virtual Audio"), lpunk, CLSID_OBS_VirtualA)
+CSource(NAME("OBS Virtual Audio"), lpunk, CLSID_OBS_NativeA)
 {
 	ASSERT(phr);
 	CAutoLock cAutoLock(&m_cStateLock);

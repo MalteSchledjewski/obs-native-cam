@@ -18,28 +18,28 @@
 CUnknown * WINAPI CreateInstance(LPUNKNOWN lpunk, HRESULT *phr)
 {
 	ASSERT(phr);
-	CUnknown *punk = new CVCam(lpunk, phr, CLSID_OBS_VirtualV, ModeVideo);
+	CUnknown *punk = new CVCam(lpunk, phr, CLSID_OBS_NativeV, ModeVideo);
 	return punk;
 }
 
 CUnknown * WINAPI CreateInstance2(LPUNKNOWN lpunk, HRESULT *phr)
 {
 	ASSERT(phr);
-	CUnknown *punk = new CVCam(lpunk, phr, CLSID_OBS_VirtualV2, ModeVideo2);
+	CUnknown *punk = new CVCam(lpunk, phr, CLSID_OBS_NativeV2, ModeVideo2);
 	return punk;
 }
 
 CUnknown * WINAPI CreateInstance3(LPUNKNOWN lpunk, HRESULT *phr)
 {
 	ASSERT(phr);
-	CUnknown *punk = new CVCam(lpunk, phr, CLSID_OBS_VirtualV3, ModeVideo3);
+	CUnknown *punk = new CVCam(lpunk, phr, CLSID_OBS_NativeV3, ModeVideo3);
 	return punk;
 }
 
 CUnknown * WINAPI CreateInstance4(LPUNKNOWN lpunk, HRESULT *phr)
 {
 	ASSERT(phr);
-	CUnknown *punk = new CVCam(lpunk, phr, CLSID_OBS_VirtualV4, ModeVideo4);
+	CUnknown *punk = new CVCam(lpunk, phr, CLSID_OBS_NativeV4, ModeVideo4);
 	return punk;
 }
 

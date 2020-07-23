@@ -71,7 +71,7 @@ const AMOVIESETUP_PIN AMSPinA =
 
 const AMOVIESETUP_FILTER AMSFilterV =
 {
-	&CLSID_OBS_VirtualV,  
+	&CLSID_OBS_NativeV,  
 	L"OBS Native Cam",     
 	MERIT_DO_NOT_USE,      
 	1,                     
@@ -80,7 +80,7 @@ const AMOVIESETUP_FILTER AMSFilterV =
 
 const AMOVIESETUP_FILTER AMSFilterV2 =
 {
-	&CLSID_OBS_VirtualV2,
+	&CLSID_OBS_NativeV2,
 	L"OBS Native Cam2",
 	MERIT_DO_NOT_USE,
 	1,
@@ -89,7 +89,7 @@ const AMOVIESETUP_FILTER AMSFilterV2 =
 
 const AMOVIESETUP_FILTER AMSFilterV3 =
 {
-	&CLSID_OBS_VirtualV3,
+	&CLSID_OBS_NativeV3,
 	L"OBS Native Cam3",
 	MERIT_DO_NOT_USE,
 	1,
@@ -98,7 +98,7 @@ const AMOVIESETUP_FILTER AMSFilterV3 =
 
 const AMOVIESETUP_FILTER AMSFilterV4 =
 {
-	&CLSID_OBS_VirtualV4,
+	&CLSID_OBS_NativeV4,
 	L"OBS Native Cam4",
 	MERIT_DO_NOT_USE,
 	1,
@@ -107,7 +107,7 @@ const AMOVIESETUP_FILTER AMSFilterV4 =
 
 const AMOVIESETUP_FILTER AMSFilterA =
 {
-	&CLSID_OBS_VirtualA,  
+	&CLSID_OBS_NativeA,  
 	L"OBS Native Audio",     
 	MERIT_DO_NOT_USE,      
 	1,                     
@@ -118,35 +118,35 @@ CFactoryTemplate g_Templates[NUM_VIDEO_FILTERS + 1] =
 {
 	{
 		L"OBS-Native-Camera",
-		&CLSID_OBS_VirtualV,
+		&CLSID_OBS_NativeV,
 		CreateInstance,
 		NULL,
 		&AMSFilterV
 	},
 	{
 		L"OBS-Native-Camera2",
-		&CLSID_OBS_VirtualV2,
+		&CLSID_OBS_NativeV2,
 		CreateInstance2,
 		NULL,
 		&AMSFilterV2
 	},
 	{
 		L"OBS-Native-Camera3",
-		&CLSID_OBS_VirtualV3,
+		&CLSID_OBS_NativeV3,
 		CreateInstance3,
 		NULL,
 		&AMSFilterV3
 	},
 	{
 		L"OBS-Native-Camera4",
-		&CLSID_OBS_VirtualV4,
+		&CLSID_OBS_NativeV4,
 		CreateInstance4,
 		NULL,
 		&AMSFilterV4
 	},
 	{
 		L"OBS-Native-Audio",
-		&CLSID_OBS_VirtualA,
+		&CLSID_OBS_NativeA,
 		CVAudio::CreateInstance,
 		NULL,
 		&AMSFilterA
@@ -171,7 +171,7 @@ STDAPI RegisterFilters(BOOL bRegister,int reg_video_filters)
 	hr = CoInitialize(0);
 	if (bRegister) {
 
-		hr = AMovieSetupRegisterServer(CLSID_OBS_VirtualA, L"OBS-Native-Audio",
+		hr = AMovieSetupRegisterServer(CLSID_OBS_NativeA, L"OBS-Native-Audio",
 			achFileName);
 
 		for (int i = 0; i < reg_video_filters; i++) {
@@ -194,7 +194,7 @@ STDAPI RegisterFilters(BOOL bRegister,int reg_video_filters)
 				rf2.dwMerit = MERIT_DO_NOT_USE;
 				rf2.cPins = 1;
 				rf2.rgPins = &AMSPinA;
-				hr = fm->RegisterFilter(CLSID_OBS_VirtualA, L"OBS-Native-Audio",
+				hr = fm->RegisterFilter(CLSID_OBS_NativeA, L"OBS-Native-Audio",
 					&moniker_audio, &CLSID_AudioInputDeviceCategory, NULL, &rf2);
 				rf2.rgPins = &AMSPinV;
 				for (int i = 0; i < reg_video_filters; i++) {
@@ -206,7 +206,7 @@ STDAPI RegisterFilters(BOOL bRegister,int reg_video_filters)
 
 			} else {
 				hr = fm->UnregisterFilter(&CLSID_AudioInputDeviceCategory, 0, 
-					CLSID_OBS_VirtualA);
+					CLSID_OBS_NativeA);
 
 				for (int i = 0; i < reg_video_filters; i++) {
 					hr = fm->UnregisterFilter(&CLSID_VideoInputDeviceCategory, 0,
@@ -220,7 +220,7 @@ STDAPI RegisterFilters(BOOL bRegister,int reg_video_filters)
 	}
 
 	if (SUCCEEDED(hr) && !bRegister){
-		hr = AMovieSetupUnregisterServer(CLSID_OBS_VirtualA);
+		hr = AMovieSetupUnregisterServer(CLSID_OBS_NativeA);
 		for (int i = 0; i < reg_video_filters; i++) {
 			hr = AMovieSetupUnregisterServer(*(g_Templates[i].m_ClsID));
 		}

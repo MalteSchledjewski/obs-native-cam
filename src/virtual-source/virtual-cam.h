@@ -10,10 +10,10 @@ extern "C"
 
 #define DECLARE_PTR(type, ptr, expr) type* ptr = (type*)(expr);
 
-EXTERN_C const GUID CLSID_OBS_VirtualV;
-EXTERN_C const GUID CLSID_OBS_VirtualV2;
-EXTERN_C const GUID CLSID_OBS_VirtualV3;
-EXTERN_C const GUID CLSID_OBS_VirtualV4;
+EXTERN_C const GUID CLSID_OBS_NativeV;
+EXTERN_C const GUID CLSID_OBS_NativeV2;
+EXTERN_C const GUID CLSID_OBS_NativeV3;
+EXTERN_C const GUID CLSID_OBS_NativeV4;
 
 class CVCamStream;
 
