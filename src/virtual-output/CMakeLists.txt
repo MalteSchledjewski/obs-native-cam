@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.5)
-project(obs-virtualoutput)
+project(obs-nativeoutput)
 
 find_package(FFmpeg COMPONENTS avutil avfilter REQUIRED)
 
@@ -51,7 +51,7 @@ set(virtualoutput_HEADERS
 	)
 	
 
-add_library(obs-virtualoutput MODULE
+add_library(obs-nativeoutput MODULE
 	${virtualoutput_SOURCES}
 	${virtualoutput_HEADERS})
 	
@@ -62,7 +62,7 @@ include_directories(
 	${Qt5Core_INCLUDES}
 	${Qt5Widgets_INCLUDES})
 		
-target_link_libraries(obs-virtualoutput
+target_link_libraries(obs-nativeoutput
 	${FFMPEG_LIBRARIES}
 	${LIBOBS_LIB}
 	${OBS_FRONTEND_LIB}

@@ -36,7 +36,7 @@ struct virtual_filter_data {
 static const char *virtual_filter_get_name(void *unused)
 {
 	UNUSED_PARAMETER(unused);
-	return obs_module_text("VirtualCam");
+	return obs_module_text("NativeCam");
 }
 
 static void *virtual_filter_create(obs_data_t *settings, obs_source_t *context)
@@ -217,10 +217,10 @@ static obs_properties_t *virtual_filter_properties(void *data)
 	cb = obs_properties_add_list(props, S_TARGET, T_TARGET, 
 		OBS_COMBO_TYPE_LIST, OBS_COMBO_FORMAT_INT);
 
-	obs_property_list_add_int(cb, "OBS-Camera", ModeVideo);
-	obs_property_list_add_int(cb, "OBS-Camera2", ModeVideo2);
-	obs_property_list_add_int(cb, "OBS-Camera3", ModeVideo3);
-	obs_property_list_add_int(cb, "OBS-Camera4", ModeVideo4);
+	obs_property_list_add_int(cb, "OBS-Native-Camera", ModeVideo);
+	obs_property_list_add_int(cb, "OBS-Native-Camera2", ModeVideo2);
+	obs_property_list_add_int(cb, "OBS-Native-Camera3", ModeVideo3);
+	obs_property_list_add_int(cb, "OBS-Native-Camera4", ModeVideo4);
 
 	obs_properties_add_bool(props, S_FLIP, T_FLIP);
 	obs_properties_add_bool(props, S_RATIO, T_RATIO);
@@ -244,7 +244,7 @@ static void virtual_filter_defaults(obs_data_t *settings)
 struct obs_source_info create_filter_info()
 {
 	struct obs_source_info filter_info = {};
-	filter_info.id = "virtualcam-filter";
+	filter_info.id = "nativecam-filter";
 	filter_info.type = OBS_SOURCE_TYPE_FILTER;
 	filter_info.output_flags = OBS_SOURCE_VIDEO;
 	filter_info.get_name = virtual_filter_get_name;

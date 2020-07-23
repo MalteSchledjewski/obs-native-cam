@@ -5,11 +5,11 @@
 #include "libavutil/samplefmt.h"
 
 #define AUDIO_SIZE 4096
-#define MAPPING_NAMEV  "OBSVirtualVideo"
-#define MAPPING_NAMEV2 "OBSVirtualVideo2"
-#define MAPPING_NAMEV3 "OBSVirtualVideo3"
-#define MAPPING_NAMEV4 "OBSVirtualVideo4"
-#define MAPPING_NAMEA  "OBSVirtualAudio"
+#define MAPPING_NAMEV  "OBSNativeVideo"
+#define MAPPING_NAMEV2 "OBSNativeVideo2"
+#define MAPPING_NAMEV3 "OBSNativeVideo3"
+#define MAPPING_NAMEV4 "OBSNativeVideo4"
+#define MAPPING_NAMEA  "OBSNativeAudio"
 
 typedef signed char        int8_t;
 typedef short              int16_t;

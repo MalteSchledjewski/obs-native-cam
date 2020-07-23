@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.5)
-project(obs-virtualsource)
+project(obs-nativesource)
 
 find_package(FFmpeg COMPONENTS swscale REQUIRED)
 
@@ -30,7 +30,7 @@ else()
 	find_library(DShowLibD strmbasd PATHS "../../dshowdeps/lib/x86" NO_DEFAULT_PATH)
 endif()
 
-add_library(obs-virtualsource MODULE
+add_library(obs-nativesource MODULE
 	${virtualsource_SOURCES}
 	${virtualsource_HEADERS})
 	
@@ -40,7 +40,7 @@ include_directories(
 	
 SET(DSHOW_LIBRARY optimized ${DShowLib} debug ${DShowLibD})	
 		
-target_link_libraries(obs-virtualsource
+target_link_libraries(obs-nativesource
 	${FFMPEG_LIBRARIES}
 	${DSHOW_LIBRARY}
 	winmm
