@@ -33,6 +33,7 @@ set(PTHREAD_LIB "PTHREAD_LIB-NOTFOUND" CACHE FILEPATH "PTHREAD library")
 	
 set(virtualoutput_SOURCES
 	virtual_main.cpp
+	virtualoutput.rc
 	virtual_output.cpp
 	virtual_properties.cpp
 	virtual_filter.cpp
@@ -50,6 +51,13 @@ set(virtualoutput_HEADERS
 	../queue/share_queue.h
 	)
 	
+if(WIN32)
+	set(OBS_VIRTUALOUTPUT_VERSION_MAJOR 2)
+	set(OBS_VIRTUALOUTPUT_VERSION_MINOR 0)
+	set(OBS_VIRTUALOUTPUT_VERSION_PATCH 5)
+	set(OBS_VIRTUALOUTPUT_VERSION_STRING "2.0.5")
+	configure_file(${CMAKE_CURRENT_SOURCE_DIR}/virtualoutput.rc.in ${CMAKE_CURRENT_SOURCE_DIR}/virtualoutput.rc)
+endif()
 
 add_library(obs-nativeoutput MODULE
 	${virtualoutput_SOURCES}
@@ -70,3 +78,17 @@ target_link_libraries(obs-nativeoutput
 	Qt5::Core
 	Qt5::Widgets)
 	
+if(MSVC)
+	foreach(t EXE SHARED MODULE)
+		set(CMAKE_${t}_LINKER_FLAGS "${CMAKE_${t}_LINKER_FLAGS} /OPT:REF /OPT:ICF /d2:-FH4-")
+		set(CMAKE_${t}_LINKER_FLAGS_DEBUG "${CMAKE_${t}_LINKER_FLAGS_DEBUG} /INCREMENTAL:NO /d2:-FH4-")
+		set(CMAKE_${t}_LINKER_FLAGS_RELWITHDEBINFO "${CMAKE_${t}_LINKER_FLAGS_RELWITHDEBINFO} /INCREMENTAL:NO /PDBSTRIPPED /d2:-FH4-")
+	endforeach()
+	
+	foreach(var CMAKE_CXX_FLAGS CMAKE_CXX_FLAGS_DEBUG CMAKE_CXX_FLAGS_RELEASE
+      CMAKE_CXX_FLAGS_MINSIZEREL CMAKE_CXX_FLAGS_RELWITHDEBINFO)
+      if(${var} MATCHES "/MD")
+        string(REGEX REPLACE "/MD" "/MD /d2FH4-" ${var} "${${var}}")
+      endif()
+    endforeach()
+endif()

@@ -5,10 +5,11 @@ find_package(FFmpeg COMPONENTS swscale REQUIRED)
 
 set(virtualsource_SOURCES
 	dllmain.cpp
+	virtualsource.rc
 	virtual-cam.cpp
 	virtual-audio.cpp
 	clock.cpp
-	virtua-source.def
+	virtual-source.def
 	../queue/share_queue_read.cpp
 	)
 
@@ -19,6 +20,14 @@ set(virtualsource_HEADERS
 	../queue/share_queue_read.h
 	../queue/share_queue.h
 	)
+
+if(WIN32)
+	set(OBS_VIRTUALSOURCE_VERSION_MAJOR 2)
+	set(OBS_VIRTUALSOURCE_VERSION_MINOR 0)
+	set(OBS_VIRTUALSOURCE_VERSION_PATCH 5)
+	set(OBS_VIRTUALSOURCE_VERSION_STRING "2.0.5")
+	configure_file(${CMAKE_CURRENT_SOURCE_DIR}/virtualsource.rc.in ${CMAKE_CURRENT_SOURCE_DIR}/virtualsource.rc)
+endif()
 	
 set(DShowPath "../../dshowdeps/include")
 
@@ -49,16 +58,23 @@ target_link_libraries(obs-nativesource
 	
 if(MSVC)
 	set(CMAKE_EXE_LINKER_FLAGS
-      "${CMAKE_EXE_LINKER_FLAGS} /DEF:virtua-source.def /NODEFAULTLIB")
+      "${CMAKE_EXE_LINKER_FLAGS} /DEF:virtual-source.def /NODEFAULTLIB")
+	foreach(t EXE SHARED MODULE)
+		set(CMAKE_${t}_LINKER_FLAGS "${CMAKE_${t}_LINKER_FLAGS} /OPT:REF")
+		set(CMAKE_${t}_LINKER_FLAGS_DEBUG "${CMAKE_${t}_LINKER_FLAGS_DEBUG} /INCREMENTAL:NO")
+		set(CMAKE_${t}_LINKER_FLAGS_RELWITHDEBINFO "${CMAKE_${t}_LINKER_FLAGS_RELWITHDEBINFO} /INCREMENTAL:NO /PDBSTRIPPED")
+	endforeach()
 	
     foreach(var CMAKE_CXX_FLAGS CMAKE_CXX_FLAGS_DEBUG CMAKE_CXX_FLAGS_RELEASE
       CMAKE_CXX_FLAGS_MINSIZEREL CMAKE_CXX_FLAGS_RELWITHDEBINFO)
       if(${var} MATCHES "/MD")
         string(REGEX REPLACE "/MD" "/MT" ${var} "${${var}}")
       endif()
-    endforeach()	
-		  
+    endforeach()
 endif()
-SET(CMAKE_MODULE_LINKER_FLAGS_DEBUG "${CMAKE_MODULE_LINKER_FLAGS_DEBUG} /SAFESEH:NO")
-SET(CMAKE_MODULE_LINKER_FLAGS_RELEASE "${CMAKE_MODULE_LINKER_FLAGS_RELEASE} /SAFESEH:NO")
+
+set_target_properties(obs-nativesource
+	PROPERTIES
+	VERSION "1.0.0"
+	PRODUCTNAME "OBS Nativecam Plugin")
 	
