@@ -42,7 +42,7 @@ jobs:
         run: |
           git checkout ${{ env.OBS_GIT_TAG }}
           git submodule update
-      - name: 'Get obs-naive-cam git info'
+      - name: 'Get obs-native-cam git info'
         shell: bash
         working-directory: ${{ github.workspace }}/obs-native-cam
         run: |
