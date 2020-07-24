@@ -6,10 +6,6 @@
 #include "virtual-cam.h"
 #include "clock.h"
 
-#define MIN_WIDTH 320
-#define MIN_HEIGHT 240
-#define MAX_WIDTH 4096
-#define MAX_HEIGHT 3072
 #define MAX_FRAMETIME 1000000
 #define MIN_FRAMETIME 166666
 #define SLEEP_DURATION 5
@@ -109,10 +105,10 @@ bool CVCamStream::CheckObsSetting()
 void CVCamStream::SetConvertContext()
 {
 	VIDEOINFOHEADER *pvi = (VIDEOINFOHEADER *)(m_mt.Format());
-	scale_info.dst_format = AV_PIX_FMT_BGRA;//AV_PIX_FMT_YUYV422;
+	scale_info.dst_format = AV_PIX_FMT_BGR24;//AV_PIX_FMT_BGRA;//AV_PIX_FMT_YUYV422;
 	scale_info.dst_width = pvi->bmiHeader.biWidth;
 	scale_info.dst_height = pvi->bmiHeader.biHeight;
-	scale_info.dst_linesize[0] = pvi->bmiHeader.biWidth * 4;////pvi->bmiHeader.biWidth * 2;
+	scale_info.dst_linesize[0] = pvi->bmiHeader.biWidth * 3;//4;////pvi->bmiHeader.biWidth * 2;
 }
 
 void CVCamStream::SetSyncTimeout()
@@ -296,12 +292,12 @@ HRESULT CVCamStream::GetMediaType(int iPosition,CMediaType *pmt)
 	pvi->bmiHeader.biWidth = format_list[iPosition].width;
 	pvi->bmiHeader.biHeight = format_list[iPosition].height;
 	pvi->AvgTimePerFrame = format_list[iPosition].time_per_frame;
-	pvi->bmiHeader.biCompression = 0;// MAKEFOURCC('Y', 'U', 'Y', '2');
-	pvi->bmiHeader.biBitCount = 32;
+	pvi->bmiHeader.biCompression = BI_RGB;// MAKEFOURCC('Y', 'U', 'Y', '2');
+	pvi->bmiHeader.biBitCount = 24;//32;
 	pvi->bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
 	pvi->bmiHeader.biPlanes = 1;
 	pvi->bmiHeader.biSizeImage = pvi->bmiHeader.biWidth * 
-		pvi->bmiHeader.biHeight * 4;
+		pvi->bmiHeader.biHeight * 3;//4;
 	pvi->bmiHeader.biClrImportant = 0;
 
 	SetRectEmpty(&(pvi->rcSource)); 
@@ -310,7 +306,8 @@ HRESULT CVCamStream::GetMediaType(int iPosition,CMediaType *pmt)
 	pmt->SetType(&MEDIATYPE_Video);
 	pmt->SetFormatType(&FORMAT_VideoInfo);
 	pmt->SetTemporalCompression(FALSE);
-	pmt->SetSubtype(&MEDIASUBTYPE_RGB32);
+	//pmt->SetSubtype(&MEDIASUBTYPE_RGB32);
+	pmt->SetSubtype(&MEDIASUBTYPE_RGB24);
 	pmt->SetSampleSize(pvi->bmiHeader.biSizeImage);
 
 
@@ -335,7 +332,7 @@ HRESULT CVCamStream::CheckMediaType(const CMediaType *pMediaType)
 	if (*info != FORMAT_VideoInfo)
 		return E_INVALIDARG;
 
-	if (*subtype != MEDIASUBTYPE_RGB32)// MEDIASUBTYPE_YUY2)
+	if (*subtype != MEDIASUBTYPE_RGB24)//32)// MEDIASUBTYPE_YUY2)
 		return E_INVALIDARG;
 
 	if (pvi->AvgTimePerFrame < 166666 || pvi->AvgTimePerFrame >1000000)
@@ -462,19 +459,19 @@ HRESULT STDMETHODCALLTYPE CVCamStream::GetStreamCaps(int iIndex,
 	pvi->bmiHeader.biHeight = format_list[iIndex].height;
 	pvi->AvgTimePerFrame = format_list[iIndex].time_per_frame;
 	pvi->AvgTimePerFrame = 333333;
-	pvi->bmiHeader.biCompression = 0;//MAKEFOURCC('Y', 'U', 'Y', '2');
-	pvi->bmiHeader.biBitCount = 32;
+	pvi->bmiHeader.biCompression = BI_RGB;//MAKEFOURCC('Y', 'U', 'Y', '2');
+	pvi->bmiHeader.biBitCount = 24;//32;
 	pvi->bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
 	pvi->bmiHeader.biPlanes = 1;
 	pvi->bmiHeader.biSizeImage = pvi->bmiHeader.biWidth * 
-		pvi->bmiHeader.biHeight * 4;
+		pvi->bmiHeader.biHeight * 3;//4;
 	pvi->bmiHeader.biClrImportant = 0;
 
 	SetRectEmpty(&(pvi->rcSource)); 
 	SetRectEmpty(&(pvi->rcTarget)); 
 
 	(*pmt)->majortype = MEDIATYPE_Video;
-	(*pmt)->subtype = MEDIASUBTYPE_RGB32;//MEDIASUBTYPE_YUY2;
+	(*pmt)->subtype = MEDIASUBTYPE_RGB24;//32;//MEDIASUBTYPE_YUY2;
 	(*pmt)->formattype = FORMAT_VideoInfo;
 	(*pmt)->bTemporalCompression = FALSE;
 	(*pmt)->bFixedSizeSamples = FALSE;
@@ -509,9 +506,9 @@ HRESULT STDMETHODCALLTYPE CVCamStream::GetStreamCaps(int iIndex,
 	pvscc->MinFrameInterval = pvi->AvgTimePerFrame;   
 	pvscc->MaxFrameInterval = pvi->AvgTimePerFrame; 
 	pvscc->MinBitsPerSecond = pvi->bmiHeader.biWidth * pvi->bmiHeader.biHeight 
-		* 4 * 8 * (10000000 / pvi->AvgTimePerFrame);
+		* 3 * 8 * (10000000 / pvi->AvgTimePerFrame);
 	pvscc->MaxBitsPerSecond = pvi->bmiHeader.biWidth * pvi->bmiHeader.biHeight 
-		* 4 * 8 * (10000000 / pvi->AvgTimePerFrame);
+		* 3 * 8 * (10000000 / pvi->AvgTimePerFrame);
 
 	return S_OK;
 }
