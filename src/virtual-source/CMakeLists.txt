@@ -24,8 +24,8 @@ set(virtualsource_HEADERS
 if(WIN32)
 	set(OBS_VIRTUALSOURCE_VERSION_MAJOR 2)
 	set(OBS_VIRTUALSOURCE_VERSION_MINOR 0)
-	set(OBS_VIRTUALSOURCE_VERSION_PATCH 5)
-	set(OBS_VIRTUALSOURCE_VERSION_STRING "2.0.5")
+	set(OBS_VIRTUALSOURCE_VERSION_PATCH 6)
+	set(OBS_VIRTUALSOURCE_VERSION_STRING "2.0.6")
 	configure_file(${CMAKE_CURRENT_SOURCE_DIR}/virtualsource.rc.in ${CMAKE_CURRENT_SOURCE_DIR}/virtualsource.rc)
 endif()
 	
@@ -75,6 +75,6 @@ endif()
 
 set_target_properties(obs-nativesource
 	PROPERTIES
-	VERSION "1.0.0"
+	VERSION "1.0.1"
 	PRODUCTNAME "OBS Nativecam Plugin")
 	

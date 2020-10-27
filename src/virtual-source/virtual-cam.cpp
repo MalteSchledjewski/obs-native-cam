@@ -6,6 +6,10 @@
 #include "virtual-cam.h"
 #include "clock.h"
 
+#define MIN_WIDTH 320
+#define MIN_HEIGHT 240
+#define MAX_WIDTH 4096
+#define MAX_HEIGHT 3072
 #define MAX_FRAMETIME 1000000
 #define MIN_FRAMETIME 166666
 #define SLEEP_DURATION 5
@@ -61,7 +65,7 @@ CVCamStream::CVCamStream(HRESULT *phr, CVCam *pParent, LPCWSTR pPinName, int mod
 CSourceStream(NAME("Video"), phr, pParent, pPinName), parent(pParent)
 {
 	queue_mode = mode;
-	//ListSupportFormat();
+	ListSupportFormat();
 	use_obs_format_init = CheckObsSetting();
 	GetMediaType(0, &m_mt);
 	prev_end_ts = 0;
@@ -81,7 +85,6 @@ bool CVCamStream::CheckObsSetting()
 		if (obs_frame_time < MIN_FRAMETIME || obs_frame_time > MAX_FRAMETIME)
 			return false;
 
-      /*
 		if (obs_height < MIN_HEIGHT) {
 			obs_width = obs_width * MIN_HEIGHT / obs_height;
 			obs_height = MIN_HEIGHT;
@@ -94,7 +97,7 @@ bool CVCamStream::CheckObsSetting()
 
 		if (obs_height % 2 != 0)
 			obs_height += 1;
-      */
+
 		format_list.push_front(struct format(obs_width, obs_height, 
 			obs_frame_time));
 	}
@@ -231,7 +234,7 @@ STDMETHODIMP CVCamStream::Notify(IBaseFilter * pSender, Quality q)
 {
 	return E_NOTIMPL;
 }
-/*
+
 bool CVCamStream::ListSupportFormat()
 {
 	if (format_list.size() > 0)
@@ -243,7 +246,7 @@ bool CVCamStream::ListSupportFormat()
 	format_list.push_back(struct format(640, 360, 333333));
 
 	return true;
-}*/
+}
 
 HRESULT CVCamStream::SetMediaType(const CMediaType *pmt)
 {
@@ -254,11 +257,8 @@ HRESULT CVCamStream::SetMediaType(const CMediaType *pmt)
 
 HRESULT CVCamStream::GetMediaType(int iPosition,CMediaType *pmt)
 {
-	//if (format_list.size() == 0)
-		//ListSupportFormat();
-  //no source stream must have been created yet. fail.
-  if (format_list.size()==0)
-    return E_INVALIDARG;
+	if (format_list.size() == 0)
+		ListSupportFormat();
 
 	if (iPosition < 0 || iPosition > format_list.size()-1)
 		return E_INVALIDARG;
@@ -267,7 +267,7 @@ HRESULT CVCamStream::GetMediaType(int iPosition,CMediaType *pmt)
 	pmt->AllocFormatBuffer(sizeof(VIDEOINFOHEADER)));
 	ZeroMemory(pvi, sizeof(VIDEOINFOHEADER));
 
-  /*
+
 	pvi->bmiHeader.biWidth = format_list[iPosition].width;
 	pvi->bmiHeader.biHeight = format_list[iPosition].height;
 	pvi->AvgTimePerFrame = format_list[iPosition].time_per_frame;
@@ -287,7 +287,6 @@ HRESULT CVCamStream::GetMediaType(int iPosition,CMediaType *pmt)
 	pmt->SetTemporalCompression(FALSE);
 	pmt->SetSubtype(&MEDIASUBTYPE_YUY2);
 	pmt->SetSampleSize(pvi->bmiHeader.biSizeImage);
-  */
 
 	pvi->bmiHeader.biWidth = format_list[iPosition].width;
 	pvi->bmiHeader.biHeight = format_list[iPosition].height;
@@ -346,7 +345,6 @@ HRESULT CVCamStream::CheckMediaType(const CMediaType *pMediaType)
 
 bool CVCamStream::ValidateResolution(long width,long height)
 {
-/*
 	if (width < 320 || height < 240)
 		return false;
 	else if (width > 4096)
@@ -355,9 +353,7 @@ bool CVCamStream::ValidateResolution(long width,long height)
 		return true;
 	else if (width * 3 == height * 4)
 		return true;
-	else
-  */
-  if (use_obs_format_init && width == obs_width && height == obs_height)
+	else if (use_obs_format_init && width == obs_width && height == obs_height)
 		return true;
 	else
 		return false;
@@ -434,8 +430,8 @@ HRESULT STDMETHODCALLTYPE CVCamStream::GetFormat(AM_MEDIA_TYPE **ppmt)
 HRESULT STDMETHODCALLTYPE CVCamStream::GetNumberOfCapabilities(int *piCount, 
 	int *piSize)
 {
-	//if (format_list.size() == 0)
-		//ListSupportFormat();
+	if (format_list.size() == 0)
+		ListSupportFormat();
 	
 	*piCount = format_list.size();
 	*piSize = sizeof(VIDEO_STREAM_CONFIG_CAPS);
@@ -445,8 +441,8 @@ HRESULT STDMETHODCALLTYPE CVCamStream::GetNumberOfCapabilities(int *piCount,
 HRESULT STDMETHODCALLTYPE CVCamStream::GetStreamCaps(int iIndex, 
 	AM_MEDIA_TYPE **pmt, BYTE *pSCC)
 {
-	//if (format_list.size() == 0)
-		//ListSupportFormat();
+	if (format_list.size() == 0)
+		ListSupportFormat();
 
 	if (iIndex < 0 || iIndex > format_list.size() - 1)
 		return E_INVALIDARG;

@@ -105,7 +105,7 @@ public:
 	
 private:
 
-	//bool ListSupportFormat(void);
+	bool ListSupportFormat(void);
 	bool CheckObsSetting(void);
 	bool ValidateResolution(long width, long height);
 	void SetSyncTimeout();
